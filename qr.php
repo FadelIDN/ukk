@@ -4,11 +4,13 @@ $conn = new mysqli("localhost", "root", "", "cafetaria_fadel");
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['jumlah'])) {
     $total = 0;
     $errors = [];
+    $hasOrder = false;
 
     foreach ($_POST['jumlah'] as $id => $qty) {
         $id = (int)$id;
         $qty = (int)$qty;
         if ($qty > 0) {
+            $hasOrder = true;
             $res = $conn->query("SELECT * FROM menu WHERE id = $id");
             if ($res->num_rows > 0) {
                 $data = $res->fetch_assoc();
@@ -25,7 +27,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['jumlah'])) {
     // Bootstrap 5 CDN
     echo '<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">';
     echo "<div class='container py-5'>";
-    if ($errors) {
+
+    if ($total == 0) {
+        echo "<div class='alert alert-danger'><h4 class='alert-heading'>Error:</h4>error pastikan stock tersedia dan pastikan anda memesan menu</div>";
+    } elseif ($errors) {
         echo "<div class='alert alert-danger'><h4 class='alert-heading'>Terjadi Kesalahan:</h4><ul class='mb-0'>";
         foreach ($errors as $e) echo "<li>$e</li>";
         echo "</ul></div>";
@@ -33,8 +38,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['jumlah'])) {
         echo "<div class='alert alert-success'><h3>Berhasil beli! Total: Rp " . number_format($total) . "</h3>";
         echo "<p><img src='qrdummy.png' width='150' class='img-thumbnail mb-3'><br>Scan QR ini untuk bayar.</p></div>";
     }
-   echo "<a href='buy.php?kantin_id=" . $_POST['kantin_id'] . "' class='btn btn-primary mt-3'>Kembali</a></div>";
-
-
+    echo "<a href='buy.php?kantin_id=" . $_POST['kantin_id'] . "' class='btn btn-primary mt-3'>Kembali</a></div>";
 }
 ?>
